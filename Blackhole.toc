@@ -1,4 +1,4 @@
-## Interface: 100207
+## Interface: 110200
 ## Title: Black Hole
 ## Author: Joseph
 ## Notes: Consumes everything in your bags at a vendor, sparing only your Hearthstone.
