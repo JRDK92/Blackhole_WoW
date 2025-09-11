@@ -1,38 +1,42 @@
-local f = CreateFrame("Frame")
-f:RegisterEvent("MERCHANT_SHOW")
+local frame = CreateFrame("Frame")
 
-local HEARTHSTONE_NAME = GetItemInfo(6948) or "Hearthstone" -- fallback if info not cached
+-- Hearthstone's unique item ID
+local HEARTHSTONE_ID = 6948
 
-local function DestroyEverything()
-    for bag = 0, NUM_BAG_SLOTS do
+-- Sell all vendorable items except Hearthstone
+local function SellAllItems()
+    for bag = BACKPACK_CONTAINER, NUM_BAG_SLOTS do
         for slot = 1, C_Container.GetContainerNumSlots(bag) do
-            local itemInfo = C_Container.GetContainerItemInfo(bag, slot)
-            if itemInfo and itemInfo.hyperlink then
-                local itemName = C_Item.GetItemName(itemInfo.hyperlink)
-                if itemName and itemName ~= HEARTHSTONE_NAME then
-                    C_Container.PickupContainerItem(bag, slot)
-                    DeleteCursorItem()
+            local itemID = C_Container.GetContainerItemID(bag, slot)
+            if itemID and itemID ~= HEARTHSTONE_ID then
+                local _, _, _, _, _, _, _, _, _, _, sellPrice = GetItemInfo(itemID)
+                if sellPrice and sellPrice > 0 then
+                    C_Container.UseContainerItem(bag, slot)
                 end
             end
         end
     end
 end
 
-f:SetScript("OnEvent", function(self, event)
-    if event == "MERCHANT_SHOW" then
-        -- Sell phase
-        for bag = 0, NUM_BAG_SLOTS do
-            for slot = 1, C_Container.GetContainerNumSlots(bag) do
-                local itemInfo = C_Container.GetContainerItemInfo(bag, slot)
-                if itemInfo and itemInfo.hyperlink then
-                    local _, _, _, _, _, _, _, _, _, _, sellPrice = GetItemInfo(itemInfo.hyperlink)
-                    if sellPrice and sellPrice > 0 then
-                        C_Container.UseContainerItem(bag, slot)
-                    end
-                end
+-- Destroy everything else except Hearthstone
+local function DestroyAllItems()
+    for bag = BACKPACK_CONTAINER, NUM_BAG_SLOTS do
+        for slot = 1, C_Container.GetContainerNumSlots(bag) do
+            local itemID = C_Container.GetContainerItemID(bag, slot)
+            if itemID and itemID ~= HEARTHSTONE_ID then
+                C_Container.DestroyContainerItem(bag, slot)
             end
         end
-        -- Destroy phase
-        DestroyEverything()
+    end
+end
+
+frame:RegisterEvent("MERCHANT_SHOW")
+frame:RegisterEvent("MERCHANT_CLOSED")
+
+frame:SetScript("OnEvent", function(self, event)
+    if event == "MERCHANT_SHOW" then
+        SellAllItems()
+    elseif event == "MERCHANT_CLOSED" then
+        DestroyAllItems()
     end
 end)
