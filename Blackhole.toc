@@ -1,0 +1,8 @@
+## Interface: 100207
+## Title: Black Hole
+## Author: Joseph
+## Notes: Consumes everything in your bags at a vendor, sparing only your Hearthstone.
+## Version: 1.0
+## SavedVariables: 
+
+BlackHole.lua
